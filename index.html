@@ -4,10 +4,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>Arbhorea Operatrice Olistica - AR</title>
 
-  <!-- Libreria A-Frame -->
-  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+  <!-- Libreria A-Frame (Versione 1.4.2 per massima compatibilità iOS/Android) -->
+  <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
 
-  <!-- Libreria MindAR (JS e CSS ufficiale) -->
+  <!-- Libreria MindAR (JS e CSS ufficiale per mostrare correttamente la scansione) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image.prod.css">
   <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
 
   <style>
@@ -17,7 +18,7 @@
       font-family: Arial, sans-serif;
     }
 
-    /* Schermata iniziale obbligatoria per sbloccare la fotocamera su iOS e Android */
+    /* Overlay di avvio necessario per permettere a Safari/iOS e Chrome di avviare la fotocamera */
     #start-overlay {
       position: absolute;
       top: 0;
@@ -45,17 +46,17 @@
       border: none;
       border-radius: 30px;
       cursor: pointer;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
       margin-top: 20px;
     }
 
-    /* Messaggio informativo in basso */
+    /* Banner informativo in basso */
     #instructions {
       position: absolute;
       bottom: 25px;
       left: 50%;
       transform: translateX(-50%);
-      background: rgba(0, 0, 0, 0.75);
+      background: rgba(0, 0, 0, 0.8);
       color: white;
       padding: 12px 24px;
       border-radius: 25px;
@@ -68,25 +69,25 @@
 </head>
 <body>
 
-  <!-- Schermata di avvio -->
+  <!-- Overlay per sblocco fotocamera -->
   <div id="start-overlay">
     <h2 style="margin-bottom: 10px;">Arbhorea Operatrice Olistica</h2>
-    <p style="margin: 0; font-size: 15px; opacity: 0.9;">Tocca il pulsante per attivare la fotocamera</p>
+    <p style="margin: 0; font-size: 15px; opacity: 0.9;">Tocca il pulsante per attivare la fotocamera e iniziare la scansione</p>
     <button id="start-btn">AVVIA FOTOCAMERA</button>
   </div>
 
   <div id="instructions">Inquadra il logo target</div>
 
-  <!-- Scena AR -->
+  <!-- Scena AR con il nuovo file targets.mind -->
   <a-scene 
-    mindar-image="imageTargetSrc: ./target.mind; autoStart: false; uiLoading: no; uiError: no; uiScanning: yes;" 
+    mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: yes; uiError: yes; uiScanning: yes;" 
     color-space="sRGB" 
     renderer="colorManagement: true, physicallyCorrectLights: true" 
     vr-mode-ui="enabled: false" 
     device-orientation-permission-ui="enabled: false">
 
     <a-assets>
-      <!-- Logo in AR -->
+      <!-- Immagine del logo sovrastampata in Realtà Aumentata -->
       <img id="logoTexture" src="./logo.png">
     </a-assets>
 
@@ -100,7 +101,7 @@
     <!-- Target AR (targetIndex: 0) -->
     <a-entity id="example-target" mindar-image-target="targetIndex: 0">
       
-      <!-- Logo 3D AR cliccabile -->
+      <!-- Piano contenente il logo (Cliccabile) -->
       <a-plane 
         id="ar-logo"
         class="clickable"
@@ -126,19 +127,23 @@
 
       const youtubeUrl = 'https://www.youtube.com/@arbhoreaoperatriceolistica';
 
-      // Avvio fotocamera dopo interazione utente
+      // Funzione per avviare la fotocamera e la scansione
       const startAR = () => {
         startOverlay.style.display = 'none';
-        const arSystem = sceneEl.systems["mindar-image-system"];
-        if (arSystem) {
-          arSystem.start();
+        
+        if (sceneEl.hasLoaded) {
+          sceneEl.systems["mindar-image-system"].start();
+        } else {
+          sceneEl.addEventListener("loaded", () => {
+            sceneEl.systems["mindar-image-system"].start();
+          });
         }
       };
 
       startBtn.addEventListener('click', startAR);
       startBtn.addEventListener('touchstart', startAR);
 
-      // Reindirizzamento al canale YouTube al tocco del logo 3D
+      // Reindirizzamento al canale YouTube toccando il logo 3D
       const openYouTube = () => {
         window.location.href = youtubeUrl;
       };
@@ -146,7 +151,7 @@
       logoEl.addEventListener('click', openYouTube);
       logoEl.addEventListener('touchstart', openYouTube);
 
-      // Eventi di rilevamento target
+      // Gestione dei messaggi durante il tracciamento
       targetEl.addEventListener("targetFound", () => {
         instructions.innerText = "Tocca il logo per aprire il canale YouTube";
       });
