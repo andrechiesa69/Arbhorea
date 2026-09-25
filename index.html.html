@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Arbhorea Operatrice Olistica - AR</title>
+
+  <!-- Librerie A-Frame e MindAR -->
+  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+    }
+
+    /* Overlay iniziale con pulsante di avvio per superare i blocchi di autoplay/fotocamera su iOS e Android */
+    #start-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      text-align: center;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    #start-btn {
+      padding: 15px 30px;
+      font-size: 18px;
+      font-weight: bold;
+      background-color: #8E44AD;
+      color: white;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      margin-top: 20px;
+    }
+
+    /* Istruzione a schermo quando si inquadra l'immagine */
+    #instructions {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.7);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 20px;
+      font-size: 14px;
+      z-index: 1000;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Schermata di avvio -->
+  <div id="start-overlay">
+    <h2>Arbhorea Operatrice Olistica</h2>
+    <p>Clicca sul pulsante in basso per attivare la fotocamera e inquadrare il logo target.</p>
+    <button id="start-btn">AVVIA REALTÀ AUMENTATA</button>
+  </div>
+
+  <div id="instructions">Inquadra il logo target con la fotocamera</div>
+
+  <!-- Scena AR -->
+  <a-scene 
+    mindar-image="imageTargetSrc: ./target.mind; autoStart: false; uiLoading: no; uiError: no; uiScanning: no;" 
+    color-space="sRGB" 
+    renderer="colorManagement: true, physicallyCorrectLights" 
+    vr-mode-ui="enabled: false" 
+    device-orientation-permission-ui="enabled: false">
+
+    <a-assets>
+      <!-- Logo che apparirà sopra il target -->
+      <img id="logoTexture" src="./logo.png">
+    </a-assets>
+
+    <a-camera position="0 0 0" look-controls="enabled: false" cursor="fuse: false; rayOrigin: mouse" raycaster="far: 10000; objects: .clickable"></a-camera>
+
+    <!-- Target AR (targetIndex: 0) -->
+    <a-entity id="example-target" mindar-image-target="targetIndex: 0">
+      
+      <!-- Piano con la texture del logo (Cliccabile) -->
+      <a-plane 
+        id="ar-logo"
+        class="clickable"
+        src="#logoTexture" 
+        position="0 0 0" 
+        height="1" 
+        width="1" 
+        rotation="0 0 0"
+        material="transparent: true; alphaTest: 0.5">
+      </a-plane>
+
+    </a-entity>
+  </a-scene>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const startBtn = document.getElementById('start-btn');
+      const startOverlay = document.getElementById('start-overlay');
+      const sceneEl = document.querySelector('a-scene');
+      const logoEl = document.getElementById('ar-logo');
+
+      // Gestione del click per avviare la fotocamera
+      startBtn.addEventListener('click', () => {
+        startOverlay.style.display = 'none';
+        
+        // Avvia la fotocamera e la scansione MindAR
+        sceneEl.systems["mindar-image-system"].start();
+      });
+
+      // Gestione del click sul logo in Realtà Aumentata
+      logoEl.addEventListener('click', () => {
+        window.open('https://www.youtube.com/@arbhoreaoperatriceolistica', '_blank');
+      });
+    });
+  </script>
+</body>
+</html>
